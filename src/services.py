@@ -1,14 +1,15 @@
 import datetime
 import json
 import logging
+from pathlib import Path
 from typing import Any, Dict, List
 
 import pandas as pd
 
+log_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/logs")
+
 logger = logging.getLogger("services")
-file_handler = logging.FileHandler(
-    "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\logs\\services.log", mode="w", encoding="utf-8"
-)
+file_handler = logging.FileHandler(log_folder / "services.log", mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(filename)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
@@ -76,9 +77,9 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
                     json_piggy_bank = json.dumps(for_answer, indent=4, ensure_ascii=False)
                 else:
                     raise ValueError
-            except ValueError:
+            except TypeError:
                 print("Что-то не так.")
-                logging.error("Видимо неверный формат даты.")
+                logger.error("Видимо неверный формат даты.")
                 json_piggy_bank = 0
             return json_piggy_bank
 
@@ -100,4 +101,4 @@ if __name__ == "__main__":
 
 # if __name__ == '__main__':
 #     print(investment_bank("2018-10", transactions_from_excel_into_list(
-#     "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\ForworkKursovOperations.xlsx"), 200))
+#     "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\KursovOperations.xlsx"), 0))

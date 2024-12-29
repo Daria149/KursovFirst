@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -9,10 +10,11 @@ from dotenv import load_dotenv
 
 from src.services import transactions_from_excel
 
+log_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/logs")
+
+
 logger = logging.getLogger("views")
-file_handler = logging.FileHandler(
-    "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\logs\\views.log", mode="w", encoding="utf-8"
-)
+file_handler = logging.FileHandler(log_folder / "views.log", mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(filename)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
@@ -20,10 +22,10 @@ logger.setLevel(logging.INFO)
 logger.setLevel(logging.ERROR)
 
 
-def greetting_time_now():
+def greetting_time_now(now_data):
     """Функция, приветствующая пользователя в зависимости от текущего времени."""
     logger.info("Выполняется функция приветствия greeting_time_now")
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.strptime(now_data, "%Y-%m-%d %H:%M:%S")
     hour = int(current_time.hour)
     if 6 <= hour <= 12:
         greeting = "Доброе утро"
@@ -33,7 +35,6 @@ def greetting_time_now():
         greeting = "Добрый вечер"
     elif 1 <= hour <= 6:
         greeting = "Доброй ночи"
-    print(greeting)
     return greeting
 
 
@@ -154,7 +155,7 @@ def get_stock_price(stocks_datas: Any) -> list[dict]:
 
 
 if __name__ == "__main__":
-    greetting_time_now()
+    greetting_time_now(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"))
     cards_expences(transactions_from_excel())
     get_top_transactions(transactions_from_excel())
     get_currency()
@@ -162,8 +163,11 @@ if __name__ == "__main__":
 
 
 # if __name__ == '__main__':
-#     print(get_currency(datas_for_currency("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json")))
+#     print(greetting_time_now(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")))
 
+# if __name__ == '__main__':
+#     print(get_currency(datas_for_currency("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json")))
+#
 # if __name__ == '__main__':
 #     print(datas_for_currency("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json"))
 # if __name__ == '__main__':

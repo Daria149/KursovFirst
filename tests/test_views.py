@@ -1,5 +1,5 @@
 from unittest.mock import patch
-
+import datetime
 from src.views import main_function
 
 
@@ -7,4 +7,4 @@ from src.views import main_function
 def test_main_function(mock_json):
     """Функция, тестирующая основную функцию"""
     mock_json.return_value == "Всё"
-    assert main_function() == "Всё"
+    assert main_function(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")) == "Всё"
