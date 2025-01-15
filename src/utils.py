@@ -121,7 +121,7 @@ def get_currency(currencies: Any) -> list[dict]:
     logger.info("Выполняется функция, выводящая Курс валют.")
     load_dotenv()
     apikey = os.getenv("API_KEY_GET_CURRENCY")
-    url = f"https://api.apilayer.com/exchangerates_data/latest"
+    url = "https://api.apilayer.com/exchangerates_data/latest"
     headers = {"apikey": f"{apikey}"}
     response_currencies = []
     parameters = {"symbols": currencies, "base": "RUB"}
