@@ -1,29 +1,30 @@
-import json
 import datetime
-from pathlib import Path
+import json
+import os
 from typing import Any
 
 from src.services import transactions_from_excel
 from src.utils import (
     cards_expences,
+    datas_for_currency,
+    datas_for_stocks,
     get_currency,
     get_stock_price,
     get_top_transactions,
     greetting_time_now,
-    datas_for_currency,
-    datas_for_stocks,
 )
 
-file_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/FilesForTasks")
-data_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/data")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+file_ = os.path.join(project_path, "data", "KursovOperations.xlsx")
+file_json = os.path.join(project_path, "data", "user_settings.json")
 
 
 def main_function(data_and_time: str) -> Any:
     greetting = greetting_time_now(data_and_time)
-    card_expences = cards_expences(transactions_from_excel(file_folder / "KursovOperations.xlsx"))
-    transactions = get_top_transactions(transactions_from_excel(file_folder / "KursovOperations.xlsx"))
-    currencies = get_currency(datas_for_currency(data_folder / "user_settings.json"))
-    stock_prices = get_stock_price(datas_for_stocks(data_folder / "user_settings.json"))
+    card_expences = cards_expences(transactions_from_excel(file_))
+    transactions = get_top_transactions(transactions_from_excel(file_))
+    currencies = get_currency(datas_for_currency(file_json))
+    stock_prices = get_stock_price(datas_for_stocks(file_json))
     json_result = json.dumps(
         {
             "greeting": greetting,

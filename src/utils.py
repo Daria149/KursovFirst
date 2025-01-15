@@ -2,7 +2,6 @@ import datetime
 import json
 import logging
 import os
-from pathlib import Path
 from typing import Any
 
 import requests
@@ -10,16 +9,19 @@ from dotenv import load_dotenv
 
 from src.services import transactions_from_excel
 
-log_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/logs")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+log_folder = os.path.join(project_path, "logs", "utils.log")
 
+d_for_stocks = os.path.join(project_path, "data")
+file_ = os.path.join(project_path, "data", "KursovOperations.xlsx")
 
-logger = logging.getLogger("views")
-file_handler = logging.FileHandler(log_folder / "views.log", mode="w", encoding="utf-8")
+logger = logging.getLogger("utils")
+file_handler = logging.FileHandler(log_folder, mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(filename)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
 logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 
 def greetting_time_now(now_data):
@@ -90,10 +92,10 @@ def datas_for_currency(file_path: Any) -> Any:
                 currency_info = json.load(f)
                 datas_for_currencies = currency_info
             except json.JSONDecodeError:
-                logging.error("Ошибка декодирования")
+                logger.error("Ошибка декодирования")
                 return datas_for_currencies
     except FileNotFoundError:
-        logging.error("Ошибка поиска файла")
+        logger.error("Ошибка поиска файла")
     list_currencies = datas_for_currencies.get("user_currencies")
     result_currencies = ",".join(list_currencies)
     return f"{result_currencies}"
@@ -105,73 +107,64 @@ def datas_for_stocks(file_path: Any) -> Any:
         with open(file_path, "r", encoding="utf-8") as f:
             try:
                 stocks_info = json.load(f)
-                data_for_stocks = stocks_info
+                data_for_stocks = stocks_info.get("user_stocks")
             except json.JSONDecodeError:
-                logging.error("Ошибка декодирования")
-                return data_for_stocks
+                logger.error("Ошибка декодирования")
+                data_for_stocks = []
     except FileNotFoundError:
-        logging.error("Ошибка поиска файла")
-    list_stocks = data_for_stocks.get("user_stocks")
-    return f"{list_stocks}"
+        logger.error("Ошибка поиска файла")
+    return data_for_stocks
 
 
 def get_currency(currencies: Any) -> list[dict]:
     """Функция, выводящая Курс валют."""
-    logging.info("Выполняется функция, выводящая Курс валют.")
+    logger.info("Выполняется функция, выводящая Курс валют.")
     load_dotenv()
-    APIKEY = os.getenv("API_KEY_GET_CURRENCY")
+    apikey = os.getenv("API_KEY_GET_CURRENCY")
     url = f"https://api.apilayer.com/exchangerates_data/latest"
-    headers = {"apikey": f"{APIKEY}"}
+    headers = {"apikey": f"{apikey}"}
     response_currencies = []
     parameters = {"symbols": currencies, "base": "RUB"}
     response = requests.get(url, params=parameters, headers=headers)
     if response.status_code != 200:
-        logging.error("Ошибка")
+        logger.error("Ошибка")
         raise Exception(f"{response.status_code}")
         response_currencies = []
     else:
         result_response = response.json()
-        currency_dict = {"currency_rates": f"{result_response["base"]}", "rate": result_response["rates"]}
-        response_currencies.append(currency_dict)
-        logging.info("Данные получены.")
-    return response_currencies
+    currency_dict = {"currency_rates": f"{result_response["base"]}", "rate": result_response["rates"]}
+    response_currencies.append(currency_dict)
+    logger.info("Данные получены.")
+    return result_response
 
 
 def get_stock_price(stocks_datas: Any) -> list[dict]:
     """Функция, выводящая стоимость акций из S&P500"""
     logger.info("Выполняется функция, выводящая стоимость акций из S&P500")
+    load_dotenv()
+    apikey = os.getenv("API_GET_STOCK_PRICE")
     stock_prices = []
-    APIKEY_STOCK = os.getenv("API_KEY_GET_STOCK")
     for stock in stocks_datas:
-        url = f"https://financialmodelingprep.com/api/v3/stock/list?apikey={APIKEY_STOCK}&symbol={stock}"
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&apikey={apikey}"
         response = requests.get(url)
         if response.status_code != 200:
             raise Exception(f"{response.status_code}")
+            logger.info("Ошибка")
         else:
             get_datas = response.json()
-            stock_prices.append({"stock": stock, "price": get_datas["price"]})
-    logger.info("Выведен список со стоимостью акций из S&P500")
+            datas = get_datas["Meta Data"]["3. Last Refreshed"]
+            data_dict = {
+                "stock": stock,
+                "price": round(float(get_datas["Time Series (Daily)"][f"{datas}"]["4. close"]), 2),
+            }
+            stock_prices.append(data_dict)
+            logger.info("Выведен список со стоимостью акций из S&P500")
     return stock_prices
 
 
 if __name__ == "__main__":
     greetting_time_now(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"))
-    cards_expences(transactions_from_excel())
-    get_top_transactions(transactions_from_excel())
-    get_currency()
-    get_stock_price()
-
-
-# if __name__ == '__main__':
-#     print(greetting_time_now(datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")))
-
-# if __name__ == '__main__':
-#     print(get_currency(datas_for_currency("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json")))
-#
-# if __name__ == '__main__':
-#     print(datas_for_currency("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json"))
-# if __name__ == '__main__':
-#     print(get_top_transactions(transactions_from_excel("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\ForworkKursovOperations.xlsx")))
-
-# if __name__ == '__main__':
-#     print(get_stock_price(datas_for_stocks("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\KursovFirst\\data\\user_settings.json")))
+    cards_expences(transactions_from_excel(file_))
+    get_top_transactions(transactions_from_excel(file_))
+    get_currency(datas_for_currency(os.path.join(d_for_stocks, "user_settings.json")))
+    get_stock_price(datas_for_stocks(os.path.join(d_for_stocks, "user_settings.json")))

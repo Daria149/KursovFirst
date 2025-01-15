@@ -1,12 +1,12 @@
+import os
 
 import pandas as pd
-from pathlib import Path
 import pytest
 
 from src.services import transactions_from_excel_into_list
 
-
-file_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/FilesForTasks")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+file_folder = os.path.join(project_path, "data", "KursovOperations.xlsx")
 
 
 @pytest.fixture
@@ -31,5 +31,5 @@ def test_transaction():
 
 @pytest.fixture
 def for_test_transactions_from_excel():
-    transaction_from_excel_list = transactions_from_excel_into_list(file_folder / "KursovOperations.xlsx")
+    transaction_from_excel_list = transactions_from_excel_into_list(file_folder)
     return transaction_from_excel_list

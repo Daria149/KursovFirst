@@ -1,20 +1,24 @@
 import datetime
 import json
 import logging
-from pathlib import Path
+import os
 from typing import Any, Dict, List
 
 import pandas as pd
 
-log_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/logs")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+log_folder = os.path.join(project_path, "logs", "services.log")
 
 logger = logging.getLogger("services")
-file_handler = logging.FileHandler(log_folder / "services.log", mode="w", encoding="utf-8")
+file_handler = logging.FileHandler(log_folder, mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(filename)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
 logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
+
+
+file_ = os.path.join(project_path, "data", "KursovOperations.xlsx")
 
 
 def transactions_from_excel(file_path: str) -> Any:
@@ -44,8 +48,6 @@ def transactions_from_excel_into_list(file_path: str) -> Any:
 def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) -> float:
     """Функция, возвращает сумму, которую удалось бы отложить в «Инвесткопилку» за определённый период."""
     logging.info("Выполняется функция, возвращает сумму, которую удалось бы отложить в «Инвесткопилку».")
-    # final_date = datetime.datetime.strptime(str_data, "%Y-%m")
-    # obj_month = datetime.datetime.strptime(month, "%Y-%m")
     transaction_by_month = []
     for trans in transactions:
         get_data = datetime.datetime.strptime(trans["Дата операции"], "%d.%m.%Y %H:%M:%S").date()
@@ -81,24 +83,12 @@ def investment_bank(month: str, transactions: List[Dict[str, Any]], limit: int) 
                 print("Что-то не так.")
                 logger.error("Видимо неверный формат даты.")
                 json_piggy_bank = 0
+            except ZeroDivisionError:
+                json_piggy_bank = "Необходимо ввести лимит, не равный '0'!"
             return json_piggy_bank
 
 
 if __name__ == "__main__":
-    transactions_from_excel()
-    transactions_from_excel_into_list()
-    investment_bank()
-
-
-# if __name__ == '__main__':
-#     print(transactions_from_excel("C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\ForworkKursovOperations.xlsx").shape)
-
-
-# if __name__ == '__main__':
-#     print(transactions_from_excel_into_list(
-#     "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\ForworkKursovOperations.xlsx"))
-
-
-# if __name__ == '__main__':
-#     print(investment_bank("2018-10", transactions_from_excel_into_list(
-#     "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\KursovOperations.xlsx"), 0))
+    transactions_from_excel(file_)
+    transactions_from_excel_into_list(file_)
+    investment_bank("2018-10", transactions_from_excel_into_list(file_), 0)

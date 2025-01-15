@@ -1,23 +1,25 @@
 import datetime
 import json
 import logging
+import os
 from functools import wraps
 from typing import Optional
-from pathlib import Path
+
 import pandas as pd
 
 from src.services import transactions_from_excel
 
-log_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/logs")
-decorator_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/data")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+log_folder = os.path.join(project_path, "logs", "reports.log")
+
 
 logger = logging.getLogger("reports")
-file_handler = logging.FileHandler(log_folder / "for_reports.log", mode="w", encoding="utf-8")
+file_handler = logging.FileHandler(log_folder, mode="w", encoding="utf-8")
 file_formatter = logging.Formatter("%(asctime)s %(filename)s %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
 logger.setLevel(logging.ERROR)
+logger.setLevel(logging.INFO)
 
 
 def file_decorator(file):
@@ -41,7 +43,7 @@ def file_decorator(file):
     return decorator_func
 
 
-@file_decorator(decorator_folder / "for_reports")
+@file_decorator(os.path.join(project_path, "data", "for_reports"))
 def spends_by_categories(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame:
     """Функция, фильтрующая траты по категориям за последние три месяца."""
     logger.info("Выполняется функция, фильтрующая траты по категориям")
@@ -55,10 +57,9 @@ def spends_by_categories(transactions: pd.DataFrame, category: str, date: Option
         & (pd.to_datetime(transactions["Дата операции"], dayfirst=True) >= start_date)
         & (transactions["Категория"] == category)
     ]
-    # for t in transactions_by_categories.to_dict(orient="records"):
-    #     logger.info("Функция, фильтрующая траты по категориям, завершилась успешно")
     tr = pd.DataFrame(transactions_by_categories)
     t = tr.to_dict(orient="records")
+    logger.info("Функция, фильтрующая траты по категориям, завершилась успешно")
     return t
 
 
@@ -68,6 +69,3 @@ if __name__ == "__main__":
         "Супермаркеты",
         "18.10.2021",
     )
-    # print(spends_by_categories(transactions_from_excel(
-    #     "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\KursovOperations.xlsx"),
-    #     "Супермаркеты", "18.10.2021"))

@@ -1,19 +1,19 @@
-import numpy as np
-from pathlib import Path
+import os
 
+import numpy as np
 
 from src.reports import spends_by_categories
 from src.services import transactions_from_excel
 
-file_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/FilesForTasks")
-test_path = Path("C:/Users/Darya/Desktop/ProjectsHometasks/KursovFirst/data")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+file_folder = os.path.join(project_path, "data", "KursovOperations.xlsx")
 
 
 def test_spends_by_categories():
     """Функция, тестирующая функцию, фильтрующую траты по категориям за последние три месяца."""
     assert (
         spends_by_categories(
-            transactions_from_excel(file_folder / "KursovOperations.xlsx").replace(np.nan, 0),
+            transactions_from_excel(file_folder).replace(np.nan, 0),
             "Авиабилеты",
             "18.10.2021",
         )
@@ -40,5 +40,4 @@ def test_spends_by_categories():
 
 def test_2_spends_by_categories():
     """Функция, тестирующая функцию, фильтрующую траты по категориям за последние три месяца."""
-    assert spends_by_categories(
-        transactions_from_excel(file_folder / "KursovOperations.xlsx"), "Супермаркеты") is None
+    assert spends_by_categories(transactions_from_excel(file_folder), "Супермаркеты") is None

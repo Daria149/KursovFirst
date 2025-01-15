@@ -1,12 +1,14 @@
-from pathlib import Path
+import os
 from unittest.mock import patch
 
 import pytest
 
 from src.services import investment_bank, transactions_from_excel, transactions_from_excel_into_list
 
-
-file_folder = Path("C:/Users/Darya/Desktop/ProjectsHometasks/FilesForTasks")
+project_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+file_folder = os.path.join(project_path, "data")
+file_path = os.path.join(project_path, "data", "KursovOperations.xlsx")
+test_error_file = os.path.join(project_path, "data", "transaction")
 
 
 @patch("pandas.read_excel")
@@ -16,13 +18,13 @@ def test_transactions_from_excel_into_list(mock_read_excel, test_transaction):
     assert transactions_from_excel_into_list("id,state\\n50,EXECUTED") == [{"ID": "50", "state": "EXECUTED"}]
 
 
-@pytest.mark.parametrize("for_tests, expected", [(transactions_from_excel_into_list(file_folder / "transaction"), {})])
+@pytest.mark.parametrize("for_tests, expected", [(transactions_from_excel_into_list(test_error_file), {})])
 def test_2_transactions_from_excel_into_list(for_tests, expected):
     """Функция, тестирующая функцию чтения данных из excel-файла с неккоректным путём к файлу/"""
     assert for_tests == expected
 
 
-@pytest.mark.parametrize("for_tests, expected", [(transactions_from_excel(file_folder / "transaction"), [])])
+@pytest.mark.parametrize("for_tests, expected", [(transactions_from_excel(test_error_file), [])])
 def test_transactions_from_excel(for_tests, expected):
     """Функция, тестирующая функцию чтения данных из excel-файла."""
     assert for_tests == expected
@@ -42,11 +44,7 @@ def test_transactions_2_from_excel():
 
 def test_3_transactions_from_excel():
     """Функция, тестирующая функцию чтения данных из excel-файла."""
-    assert (
-        transactions_from_excel(
-            "C:\\Users\\Darya\\Desktop\\ProjectsHometasks\\FilesForTasks\\KursovOperations.xlsx"
-        ).shape
-    ) == (6705, 15)
+    assert (transactions_from_excel(file_path).shape) == (6705, 15)
 
 
 def test_investment_bank(for_test_transactions_from_excel):

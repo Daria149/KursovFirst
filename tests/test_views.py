@@ -1,5 +1,6 @@
-from unittest.mock import patch
 import datetime
+from unittest.mock import patch
+
 from src.views import main_function
 
 
